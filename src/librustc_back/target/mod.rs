@@ -51,6 +51,7 @@ use std::default::Default;
 use std::old_io::fs::PathExtensions;
 
 mod windows_base;
+mod windows_msvc_base;
 mod linux_base;
 mod apple_base;
 mod apple_ios_base;
@@ -78,6 +79,7 @@ mod powerpc_unknown_linux_gnu;
 mod x86_64_apple_darwin;
 mod x86_64_apple_ios;
 mod x86_64_pc_windows_gnu;
+mod x86_64_pc_windows_msvc;
 mod x86_64_unknown_freebsd;
 mod x86_64_unknown_dragonfly;
 mod x86_64_unknown_linux_gnu;
@@ -98,6 +100,8 @@ pub struct Target {
     pub target_pointer_width: String,
     /// OS name to use for conditional compilation.
     pub target_os: String,
+    /// ABI to use for conditional compilation.
+    pub target_abi: String,
     /// Architecture to use for ABI considerations. Valid options: "x86", "x86_64", "arm",
     /// "aarch64", "mips", and "powerpc". "mips" includes "mipsel".
     pub arch: String,
@@ -158,6 +162,7 @@ pub struct TargetOptions {
     /// only realy used for figuring out how to find libraries, since Windows uses its own
     /// library naming convention. Defaults to false.
     pub is_like_windows: bool,
+    pub is_like_msvc: bool,
     /// Whether the target toolchain is like Android's. Only useful for compiling against Android.
     /// Defaults to false.
     pub is_like_android: bool,
@@ -201,6 +206,7 @@ impl Default for TargetOptions {
             is_like_osx: false,
             is_like_windows: false,
             is_like_android: false,
+            is_like_msvc: false,
             linker_is_gnu: false,
             has_rpath: false,
             no_compiler_rt: false,
@@ -248,6 +254,7 @@ impl Target {
             target_pointer_width: get_req_field("target-pointer-width"),
             arch: get_req_field("arch"),
             target_os: get_req_field("os"),
+            target_abi: get_req_field("abi"),
             options: Default::default(),
         };
 
@@ -373,7 +380,9 @@ impl Target {
             armv7s_apple_ios,
 
             x86_64_pc_windows_gnu,
-            i686_pc_windows_gnu
+            i686_pc_windows_gnu,
+            
+            x86_64_pc_windows_msvc
         );
 
 

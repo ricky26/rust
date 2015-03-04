@@ -879,14 +879,28 @@ LLVMRustDestroyArchive(Archive *ar) {
 
 #if LLVM_VERSION_MINOR >= 5
 extern "C" void
-LLVMRustSetDLLExportStorageClass(LLVMValueRef Value) {
+	LLVMRustSetDLLStorageClass(LLVMValueRef Value, unsigned int StorageClass) {
     GlobalValue *V = unwrap<GlobalValue>(Value);
-    V->setDLLStorageClass(GlobalValue::DLLExportStorageClass);
+    V->setDLLStorageClass(llvm::GlobalValue::DLLStorageClassTypes(StorageClass));
 }
 #else
 extern "C" void
-LLVMRustSetDLLExportStorageClass(LLVMValueRef Value) {
-    LLVMSetLinkage(Value, LLVMDLLExportLinkage);
+	LLVMRustSetDLLExportStorageClass(LLVMValueRef Value, unsigned int StorageClass) {
+
+	switch(StorageClass) {
+	case 0: // DefaultStorageClass
+		LLVMSetLinkage(Value, LLVMExternalLinkage);
+		break;
+
+	case 1: // DLLImportStorageClass
+		LLVMSetLinkage(Value, LLVMDLLImportLinkage);
+		break;
+		
+	case 2: // DLLExportStorageClass
+		LLVMSetLinkage(Value, LLVMDLLExportLinkage);
+		break;
+	}	
+
 }
 #endif
 

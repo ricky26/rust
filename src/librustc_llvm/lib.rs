@@ -54,6 +54,7 @@ pub use self::CallConv::*;
 pub use self::Visibility::*;
 pub use self::DiagnosticSeverity::*;
 pub use self::Linkage::*;
+pub use self::DLLStorageClass::*;
 
 use std::ffi::CString;
 use std::cell::RefCell;
@@ -111,6 +112,13 @@ pub enum Linkage {
     PrivateLinkage = 9,
     ExternalWeakLinkage = 12,
     CommonLinkage = 14,
+}
+
+#[derive(Copy)]
+pub enum DLLStorageClass {
+    DefaultStorageClass = 0,
+    DLLImportStorageClass = 1,
+    DLLExportStorageClass = 2,
 }
 
 #[repr(C)]
@@ -2052,7 +2060,7 @@ extern {
                                       out_len: *mut size_t) -> *const c_char;
     pub fn LLVMRustDestroyArchive(AR: ArchiveRef);
 
-    pub fn LLVMRustSetDLLExportStorageClass(V: ValueRef);
+    pub fn LLVMRustSetDLLStorageClass(V: ValueRef, storage_class: c_uint);
     pub fn LLVMVersionMajor() -> c_int;
     pub fn LLVMVersionMinor() -> c_int;
 
@@ -2101,6 +2109,12 @@ pub fn SetFunctionCallConv(fn_: ValueRef, cc: CallConv) {
 pub fn SetLinkage(global: ValueRef, link: Linkage) {
     unsafe {
         LLVMSetLinkage(global, link as c_uint);
+    }
+}
+
+pub fn SetDLLStorageClass(global: ValueRef, storage_class: DLLStorageClass) {
+    unsafe {
+        LLVMRustSetDLLStorageClass(global, storage_class as c_uint);
     }
 }
 

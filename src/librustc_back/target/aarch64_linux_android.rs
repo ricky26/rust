@@ -24,6 +24,7 @@ pub fn target() -> Target {
         target_pointer_width: "64".to_string(),
         arch: "aarch64".to_string(),
         target_os: "android".to_string(),
+        target_abi: "".to_string(),
         options: base,
     }
 }

@@ -693,14 +693,14 @@ fn real_args_as_bytes() -> Vec<Vec<u8>> {
 type LPCWSTR = *const u16;
 
 #[cfg(windows)]
-#[link_name="kernel32"]
+#[link(name = "kernel32")]
 extern "system" {
     fn GetCommandLineW() -> LPCWSTR;
     fn LocalFree(ptr: *mut c_void);
 }
 
 #[cfg(windows)]
-#[link_name="shell32"]
+#[link(name = "shell32")]
 extern "system" {
     fn CommandLineToArgvW(lpCmdLine: LPCWSTR,
                           pNumArgs: *mut c_int) -> *mut *mut u16;

@@ -594,6 +594,7 @@ pub fn default_configuration(sess: &Session) -> ast::CrateConfig {
     let arch = &sess.target.target.arch[];
     let wordsz = &sess.target.target.target_pointer_width[];
     let os = &sess.target.target.target_os[];
+    let abi = &sess.target.target.target_abi[];
 
     let fam = match sess.target.target.options.is_like_windows {
         true  => InternedString::new("windows"),
@@ -604,6 +605,7 @@ pub fn default_configuration(sess: &Session) -> ast::CrateConfig {
     return vec!(// Target bindings.
          attr::mk_word_item(fam.clone()),
          mk(InternedString::new("target_os"), intern(os)),
+         mk(InternedString::new("target_abi"), intern(abi)),
          mk(InternedString::new("target_family"), fam),
          mk(InternedString::new("target_arch"), intern(arch)),
          mk(InternedString::new("target_endian"), intern(end)),

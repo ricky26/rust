@@ -205,6 +205,14 @@ pub fn decl_fn(ccx: &CrateContext, name: &str, cc: llvm::CallConv,
     // Function addresses in Rust are never significant, allowing functions to be merged.
     llvm::SetUnnamedAddr(llfn, true);
 
+    // TODO: This should be conditionaly set based on whether we're producing a
+    //       dynamic library or not to follow the conventions on Windows. (ricky26)
+    
+    if ccx.sess().target.target.options.is_like_msvc {
+        llvm::SetDLLStorageClass(llfn, llvm::DLLExportStorageClass);
+        llvm::SetLinkage(llfn, llvm::ExternalLinkage);
+    }
+
     if ccx.is_split_stack_supported() && !ccx.sess().opts.cg.no_stack_check {
         set_split_stack(llfn);
     }
@@ -328,6 +336,11 @@ pub fn decl_internal_rust_fn<'a, 'tcx>(ccx: &CrateContext<'a, 'tcx>,
                                        fn_ty: Ty<'tcx>, name: &str) -> ValueRef {
     let llfn = decl_rust_fn(ccx, fn_ty, name);
     llvm::SetLinkage(llfn, llvm::InternalLinkage);
+
+    if ccx.sess().target.target.options.is_like_msvc {
+        llvm::SetLinkage(llfn, llvm::ExternalLinkage);
+    }
+
     llfn
 }
 
@@ -342,6 +355,11 @@ pub fn get_extern_const<'a, 'tcx>(ccx: &CrateContext<'a, 'tcx>, did: ast::DefId,
     unsafe {
         let buf = CString::new(name.clone()).unwrap();
         let c = llvm::LLVMAddGlobal(ccx.llmod(), ty.to_ref(), buf.as_ptr());
+
+        if ccx.sess().target.target.options.is_like_msvc {
+            llvm::SetDLLStorageClass(c, llvm::DLLImportStorageClass);
+        }
+
         // Thread-local statics in some other crate need to *always* be linked
         // against in a thread-local fashion, so we need to be sure to apply the
         // thread-local attribute locally if it was present remotely. If we
@@ -2209,6 +2227,16 @@ pub fn update_linkage(ccx: &CrateContext,
                       llval: ValueRef,
                       id: Option<ast::NodeId>,
                       llval_origin: ValueOrigin) {
+
+    // TODO: This should be conditionaly set based on whether we're producing a
+    //       dynamic library or not to follow the conventions on Windows. (ricky26)
+    
+    if ccx.sess().target.target.options.is_like_msvc {
+        llvm::SetDLLStorageClass(llval, llvm::DLLExportStorageClass);
+        llvm::SetLinkage(llval, llvm::ExternalLinkage);
+        return;
+    }
+
     match llval_origin {
         InlinedCopy => {
             // `llval` is a translation of an item defined in a separate
@@ -2638,7 +2666,7 @@ pub fn create_entry_wrapper(ccx: &CrateContext,
         // FIXME: #16581: Marking a symbol in the executable with `dllexport`
         // linkage forces MinGW's linker to output a `.reloc` section for ASLR
         if ccx.sess().target.target.options.is_like_windows {
-            unsafe { llvm::LLVMRustSetDLLExportStorageClass(llfn) }
+            llvm::SetDLLStorageClass(llfn, llvm::DLLExportStorageClass);
         }
 
         let llbb = unsafe {
