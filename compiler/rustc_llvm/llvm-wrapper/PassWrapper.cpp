@@ -203,7 +203,7 @@ void LLVMRustAddLastExtensionPasses(
 #define SUBTARGET_AVR
 #endif
 
-#ifdef LLVM_COMPONENT_M68k
+#ifdef LLVM_COMPONENT_M68K
 #define SUBTARGET_M68K SUBTARGET(M68k)
 #else
 #define SUBTARGET_M68K
@@ -256,7 +256,7 @@ void LLVMRustAddLastExtensionPasses(
   SUBTARGET_ARM                                                                \
   SUBTARGET_AARCH64                                                            \
   SUBTARGET_AVR                                                                \
-  SUBTARGET_M68K                                                               \
+  SUBTARGET_M68K                                                             \
   SUBTARGET_MIPS                                                               \
   SUBTARGET_PPC                                                                \
   SUBTARGET_SYSTEMZ                                                            \
