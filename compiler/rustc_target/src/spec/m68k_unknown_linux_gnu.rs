@@ -16,7 +16,6 @@ pub fn target() -> Target {
             env: "gnu".to_string(),
             vendor: "unknown".to_string(),
             linker_flavor: LinkerFlavor::Gcc,
-            features: "+soft-float".to_string(),
 
             ..base
         },
